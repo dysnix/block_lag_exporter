@@ -19,7 +19,7 @@ def process_block(block):
     lag = ts - timestamp
     hist.observe(lag)
     gauge.set("{:+.4f}".format(lag))
-    print("ts=%d block=%d lag=%2.4f" % (timestamp, block_number, lag))
+    print("ts=%d block=%d lag=%2.4f" % (timestamp, block_number, lag), flush=True)
     return
 
 
@@ -28,14 +28,14 @@ async def get_event():
         async with connect(ws_url) as ws:
             await ws.send('{"jsonrpc": "2.0", "id": 1, "method": "eth_subscribe", "params": ["newHeads"]}')
             subscription_response = await ws.recv()
-            print("ws subscription: %s" % subscription_response)
+            print("ws subscription: %s" % subscription_response, flush=True)
             while True:
                 message = await asyncio.wait_for(ws.recv(), timeout=5)
                 response = json.loads(message)
                 block = response['params']['result']
                 process_block(block)
     except Exception as e:
-        print(e)
+        print(e, flush=True)
         return
 
 
@@ -43,9 +43,9 @@ async def event_wrapper():
     # await asyncio.sleep(0)
     counter = 0
     while True:
-        print("Starting wrapper tasks #%d" % counter)
+        print("Starting wrapper tasks #%d" % counter, flush=True)
         await get_event()
-        print("await app done")
+        print("await app done", flush=True)
         await asyncio.sleep(2)
         counter += 1
     # yield
@@ -59,7 +59,7 @@ async def background_tasks(app):
 
 
 async def on_shutdown(app: web.Application) -> None:
-    print("Shutting down ...")
+    print("Shutting down ...", flush=True)
     # there is no sense to wait, metrics server is stopped anyway
     # await asyncio.sleep(30)
     sys.exit(0)
