@@ -17,8 +17,9 @@ def process_block(block):
     block_number = int(block['number'], 16)
     ts = time.time()
     lag = ts - timestamp
-    hist.observe(lag)
-    gauge.set("{:+.4f}".format(lag))
+    if lag < max_block_lag:
+        hist.observe(lag)
+        gauge.set("{:+.4f}".format(lag))
     print("ts=%d block=%d lag=%2.4f" % (timestamp, block_number, lag), flush=True)
     return
 
@@ -74,6 +75,7 @@ if __name__ == "__main__":
     ws_url = os.environ.get("WS_URL", "ws://localhost:8545")
     buckets = os.environ.get(
         "HIST_BUCKETS", "0.05,0.08,0.1,0.15,0.2,0.3,0.4,0.6,0.8,1.0,1.2,1.6,2.0,2.5,3.0,4.0,8.0,+Inf")
+    max_block_lag = float(os.environ.get("MAX_BLOCK_LAG", 60.0))
 
     hist = Histogram('head_lag_seconds', 'Last block lag',
                      buckets=buckets.split(','))
