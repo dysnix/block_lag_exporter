@@ -43,6 +43,7 @@ def process_block(block):
         hist.observe(lag)
         hist_miner.labels(miner=miner).observe(lag)
         gauge.set("{:+.4f}".format(lag))
+        gauge_miner.labels(miner=miner).set("{:+.4f}".format(lag))
     # print(block, flush=True)
     print(
         "ts=%d block=%d lag=%2.4f miner=%s gasUsed=%2.1f%% (%d/%d)" % (timestamp, block_number, lag, miner, gasUsedPct,
@@ -107,9 +108,11 @@ if __name__ == "__main__":
 
     hist = Histogram('head_lag_seconds', 'Last block lag',
                      buckets=buckets.split(','))
-    hist_miner = Histogram('head_lag_miners', 'Last block lag per miner',
+    hist_miner = Histogram('head_lag_seconds', 'Last block lag per miner',
                            buckets=buckets.split(','), labelnames=["miner"], registry=registry)
     gauge = Gauge('head_lag_seconds_last', 'Last block lag')
+    gauge_miner = Gauge('head_lag_seconds_last', 'Last block lag per miner',
+                        labelnames=["miner"], registry=registry)
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
