@@ -64,7 +64,7 @@ async def get_event():
             subscription_response = await ws.recv()
             print("ws subscription: %s" % subscription_response, flush=True)
             while True:
-                message = await asyncio.wait_for(ws.recv(), timeout=5)
+                message = await asyncio.wait_for(ws.recv(), timeout=ws_read_timeout)
                 response = json.loads(message)
                 block = response['params']['result']
                 process_block(block)
@@ -106,6 +106,7 @@ async def health(self):
 if __name__ == "__main__":
     metrics_port = int(os.environ.get("LISTENER_PORT", 8000))
     ws_url = os.environ.get("WS_URL", "ws://localhost:8545")
+    ws_read_timeout = int(os.environ.get("WS_READ_TIMEOUT", 25))
     buckets = os.environ.get(
         "HIST_BUCKETS", "0.05,0.08,0.1,0.15,0.2,0.3,0.4,0.6,0.8,1.0,1.2,1.6,2.0,2.5,3.0,4.0,8.0,+Inf")
     max_block_lag = float(os.environ.get("MAX_BLOCK_LAG", 60.0))
