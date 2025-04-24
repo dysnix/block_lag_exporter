@@ -1,0 +1,20 @@
+# Use an official Python runtime as a parent image
+FROM python:3.13-slim-bookworm
+
+# add uv
+COPY --from=ghcr.io/astral-sh/uv:0.6.16 /uv /uvx /bin/
+
+# Set the working directory in the container to /app
+WORKDIR /app
+
+# Add pyproject.toml to the WORKDIR
+ADD pyproject.toml uv.lock /app/
+
+# install locked deps into venv
+RUN uv sync --locked --compile-bytecode --no-install-project --no-editable --no-cache
+
+# Add the rest of the code
+ADD ./exporter/ /app/
+
+# run app from venv
+CMD [ "uv","run" "main.py" ]

@@ -1,0 +1,8 @@
+[project]
+name = "block-lag-exporter"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "prometheus-async==25.1.0",
+    "web3>=7.10.0",
+]
