@@ -33,6 +33,12 @@ async def server_stats(request: web.Request) -> web.Response:
 def process_block(block):
     timestamp = int(block['timestamp'], 16)
     block_number = int(block['number'], 16)
+    timestamp_ms = 0
+    # https://github.com/bnb-chain/BEPs/blob/master/BEPs/BEP-520.md#411-millisecond-representation-in-block-header
+    timestamp_parsed_ms = int(block['mixHash'], 16)
+    if 0 < timestamp_parsed_ms < 1000:
+        timestamp_ms = timestamp_parsed_ms
+    timestamp=timestamp*1.0+timestamp_ms/1000.0
     ts = time.time()
     lag = ts - timestamp
     miner = block['miner']
@@ -46,7 +52,7 @@ def process_block(block):
         gauge_miner.labels(miner=miner).set("{:+.4f}".format(lag))
     # print(block, flush=True)
     print(
-        "ts=%d block=%d lag=%2.4f miner=%s gasUsed=%2.1f%% (%d/%d)" % (timestamp, block_number, lag, miner, gasUsedPct,
+        "ts=%10.3f block=%d lag=%2.4f miner=%s gasUsed=%2.1f%% (%d/%d)" % (timestamp, block_number, lag, miner, gasUsedPct,
                                                                        gasUsed, gasLimit), flush=True)
     return
 
