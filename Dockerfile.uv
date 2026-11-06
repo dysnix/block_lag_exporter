@@ -17,4 +17,4 @@ RUN uv sync --locked --compile-bytecode --no-install-project --no-editable --no-
 ADD ./exporter/ /app/
 
 # run app from venv
-CMD [ "uv","run" "main.py" ]
+CMD [ "uv", "run", "main.py" ]
