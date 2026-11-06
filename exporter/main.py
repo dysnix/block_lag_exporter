@@ -30,15 +30,23 @@ async def server_stats(request: web.Request) -> web.Response:
     return rsp
 
 
-def process_block(block):
+def block_timestamp(block):
+    """Block timestamp in seconds, with sub-second precision where the chain provides it."""
+    # Base (200ms blocks): the RPC header carries the full timestamp in milliseconds
+    timestamp_ms_field = block.get('timestampMs')
+    if timestamp_ms_field is not None:
+        return int(timestamp_ms_field, 16) / 1000.0
     timestamp = int(block['timestamp'], 16)
-    block_number = int(block['number'], 16)
-    timestamp_ms = 0
     # https://github.com/bnb-chain/BEPs/blob/master/BEPs/BEP-520.md#411-millisecond-representation-in-block-header
-    timestamp_parsed_ms = int(block['mixHash'], 16)
+    timestamp_parsed_ms = int(block.get('mixHash', '0x0'), 16)
     if 0 < timestamp_parsed_ms < 1000:
-        timestamp_ms = timestamp_parsed_ms
-    timestamp=timestamp*1.0+timestamp_ms/1000.0
+        return timestamp + timestamp_parsed_ms / 1000.0
+    return float(timestamp)
+
+
+def process_block(block):
+    timestamp = block_timestamp(block)
+    block_number = int(block['number'], 16)
     ts = time.time()
     lag = ts - timestamp
     miner = block['miner']

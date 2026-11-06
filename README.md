@@ -7,6 +7,12 @@ and 2 endpoints on `http://0.0.0.0:${LISTENER_PORT}`:
 * `/metrics` - to scrape prometheus metrics
 * `/health` - to check liveness 
 
+Sub-second block timestamps are used when the chain provides them:
+* the `timestampMs` header field (Base, 200ms blocks)
+* the millisecond part in `mixHash` ([BEP-520](https://github.com/bnb-chain/BEPs/blob/master/BEPs/BEP-520.md), BSC)
+
+Otherwise the whole-second `timestamp` is used.
+
 Default values are optimized to use it as a k8s geth/geth-like sidecar 
 Use following environment variables to override defaults:
 * `LISTENER_PORT=8000` - port to listen 
